@@ -36,45 +36,148 @@ namespace Microsoft.SpatialAlignment.Persistence
     public class PersistenceExampleManager : MonoBehaviour
     {
         #region Constants
-        private const string SampleData = @"
-		[
-		  {
-			""id"": ""Parent1"",
-			""AlignmentStrategy"": {
-			  ""$type"": ""Microsoft.SpatialAlignment.SimulatedAlignment, Assembly-CSharp"",
-			  ""currentAccuracy"": {
-				""x"": 0.0,
-				""y"": 0.0,
-				""z"": 0.0
-			  },
-			  ""currentState"": ""Resolved""
-			}
-		  },
-		  {
-			""id"": ""Parent2"",
-			""AlignmentStrategy"": {
-			  ""$type"": ""Microsoft.SpatialAlignment.SimulatedAlignment, Assembly-CSharp"",
-			  ""currentAccuracy"": {
-				""x"": 0.0,
-				""y"": 0.0,
-				""z"": 0.0
-			  },
-			  ""currentState"": ""Resolved""
-			}
-		},
-		  {
-			""id"": ""Parent3"",
-			""AlignmentStrategy"": {
-			  ""$type"": ""Microsoft.SpatialAlignment.SimulatedAlignment, Assembly-CSharp"",
-			  ""currentAccuracy"": {
-				""x"": 0.0,
-				""y"": 0.0,
-				""z"": 0.0
-			  },
-			  ""currentState"": ""Resolved""
-			}
-		  }
-		]";
+        private const string SampleData = @"{
+  ""$id"": ""1"",
+  ""$values"": [
+    {
+      ""$id"": ""2"",
+      ""id"": ""Parent1"",
+      ""AlignmentStrategy"": {
+        ""$id"": ""3"",
+        ""$type"": ""Microsoft.SpatialAlignment.SimulatedAlignment, Assembly-CSharp"",
+        ""currentAccuracy"": {
+          ""x"": 0.0,
+          ""y"": 0.0,
+          ""z"": 0.0
+        },
+        ""currentState"": ""Resolved""
+      }
+    },
+    {
+      ""$id"": ""4"",
+      ""id"": ""Parent2"",
+      ""AlignmentStrategy"": {
+        ""$id"": ""5"",
+        ""$type"": ""Microsoft.SpatialAlignment.SimulatedAlignment, Assembly-CSharp"",
+        ""currentAccuracy"": {
+          ""x"": 0.0,
+          ""y"": 0.0,
+          ""z"": 0.0
+        },
+        ""currentState"": ""Resolved""
+      }
+    },
+    {
+      ""$id"": ""6"",
+      ""id"": ""Parent3"",
+      ""AlignmentStrategy"": {
+        ""$id"": ""7"",
+        ""$type"": ""Microsoft.SpatialAlignment.SimulatedAlignment, Assembly-CSharp"",
+        ""currentAccuracy"": {
+          ""x"": 0.0,
+          ""y"": 0.0,
+          ""z"": 0.0
+        },
+        ""currentState"": ""Resolved""
+      }
+    },
+    {
+      ""$id"": ""8"",
+      ""id"": ""ChildFrame"",
+      ""AlignmentStrategy"": {
+        ""$id"": ""9"",
+        ""$type"": ""Microsoft.SpatialAlignment.MultiParentAlignment, Assembly-CSharp"",
+        ""parentOptions"": {
+          ""$id"": ""10"",
+          ""$values"": [
+            {
+              ""$id"": ""11"",
+              ""frame"": {
+                ""$ref"": ""2""
+              },
+              ""minimumAccuracy"": {
+                ""x"": 0.0,
+                ""y"": 0.0,
+                ""z"": 0.0
+              },
+              ""minimuState"": ""Resolved"",
+              ""position"": {
+                ""x"": 0.0,
+                ""y"": 0.0,
+                ""z"": 0.0
+              },
+              ""rotation"": {
+                ""x"": 0.0,
+                ""y"": 0.0,
+                ""z"": 0.0
+              },
+              ""scale"": {
+                ""x"": 0.3,
+                ""y"": 0.3,
+                ""z"": 0.3
+              }
+            },
+            {
+              ""$id"": ""12"",
+              ""frame"": {
+                ""$ref"": ""4""
+              },
+              ""minimumAccuracy"": {
+                ""x"": 0.0,
+                ""y"": 0.0,
+                ""z"": 0.0
+              },
+              ""minimuState"": ""Resolved"",
+              ""position"": {
+                ""x"": 0.0,
+                ""y"": 0.0,
+                ""z"": 0.0
+              },
+              ""rotation"": {
+                ""x"": 0.0,
+                ""y"": 0.0,
+                ""z"": 0.0
+              },
+              ""scale"": {
+                ""x"": 0.3,
+                ""y"": 0.3,
+                ""z"": 0.3
+              }
+            },
+            {
+              ""$id"": ""13"",
+              ""frame"": {
+                ""$ref"": ""6""
+              },
+              ""minimumAccuracy"": {
+                ""x"": 0.0,
+                ""y"": 0.0,
+                ""z"": 0.0
+              },
+              ""minimuState"": ""Resolved"",
+              ""position"": {
+                ""x"": 0.0,
+                ""y"": 0.0,
+                ""z"": 0.0
+              },
+              ""rotation"": {
+                ""x"": 0.0,
+                ""y"": 0.0,
+                ""z"": 0.0
+              },
+              ""scale"": {
+                ""x"": 0.3,
+                ""y"": 0.3,
+                ""z"": 0.3
+              }
+            }
+          ]
+        },
+        ""updateFrequency"": 1.0
+      }
+    }
+  ]
+}";
         #endregion // Constants
 
         #region Member Variables
@@ -88,36 +191,14 @@ namespace Microsoft.SpatialAlignment.Persistence
 
         private async Task LoadAsync()
         {
-            using (StringReader sr = new StringReader(SampleData))
-            {
-                using (JsonTextReader jr = new JsonTextReader(sr))
-                {
-                    await store.LoadDocumentAsync(jr);
-                }
-            }
-
-            // Debug.Log($"Loaded {} frames.");
+            Frames = await store.LoadFramesAsync(SampleData);
+            Debug.Log($"Loaded {Frames.Count} frames.");
         }
 
         private async Task SaveAsync()
         {
-            string result = null;
-            foreach (var frame in Frames)
-            {
-                await store.SaveFrameAsync(frame);
-            }
-
-            using (StringWriter sw = new StringWriter())
-            {
-                using (JsonTextWriter jw = new JsonTextWriter(sw))
-                {
-                    await store.SaveDocumentAsync(jw);
-                    result = sw.ToString();
-                }
-            }
-
+            string result = await store.SaveFramesAsync(Frames);
             Debug.Log(result);
-
         }
 
         // Start is called before the first frame update
