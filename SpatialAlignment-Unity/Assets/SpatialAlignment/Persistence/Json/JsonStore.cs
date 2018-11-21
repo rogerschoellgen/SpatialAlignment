@@ -49,10 +49,6 @@ namespace Microsoft.SpatialAlignment.Persistence.Json
             // Make pretty
             settings.Formatting = Formatting.Indented;
 
-            // Preserve references since MultiParent alignment does reference
-            // other frames
-            settings.PreserveReferencesHandling = PreserveReferencesHandling.All;
-
             // Use custom contract resolver (handles Unity-specific instantiation)
             settings.ContractResolver = new SpatialContractResolver();
 
@@ -96,12 +92,15 @@ namespace Microsoft.SpatialAlignment.Persistence.Json
 
             // If any of the alignment strategies uses native persistence,
             // load them now
-            foreach (SpatialFrame frame in frames)
+            if (frames != null)
             {
-                INativePersistence nativePersist = frame.AlignmentStrategy as INativePersistence;
-                if (nativePersist != null)
+                foreach (SpatialFrame frame in frames)
                 {
-                    await nativePersist.LoadNativeAsync();
+                    INativePersistence nativePersist = frame.AlignmentStrategy as INativePersistence;
+                    if (nativePersist != null)
+                    {
+                        await nativePersist.LoadNativeAsync();
+                    }
                 }
             }
 
